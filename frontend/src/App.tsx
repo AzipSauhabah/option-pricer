@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Controls from "./components/Controls";
 import ChartDisplay from "./components/ChartDisplay";
-import useWS from "./usews";
-
-type Result = {
-  price: number;
-  delta: number;
-  gamma: number;
-  vega: number;
-  theta: number;
-};
+import useWS from "./useWS";
 
 export default function App() {
   const [spot, setSpot] = useState(100);
@@ -19,7 +11,7 @@ export default function App() {
   const [tau, setTau] = useState(1);
   const [optionType, setOptionType] = useState<"call" | "put">("call");
 
-  const [result, setResult] = useState<Result | null>(null);
+  const [result, setResult] = useState<any>(null);
   const [spots, setSpots] = useState<number[]>([]);
   const [prices, setPrices] = useState<number[]>([]);
   const [payoffs, setPayoffs] = useState<number[]>([]);
@@ -39,51 +31,32 @@ export default function App() {
     }
   });
 
-  // Envoi automatique des paramètres quand ils changent
+  // Envoyer mise à jour à chaque changement de paramètre
   useEffect(() => {
     const timer = setTimeout(() => {
-      const ws = wsRef.current?.current;
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(
-          JSON.stringify({ spot, strike, vol, rate, tau, optionType })
-        );
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ spot, strike, vol, rate, tau, optionType }));
       }
-    }, 200);
+    }, 80); // debounce
     return () => clearTimeout(timer);
-  }, [spot, strike, vol, rate, tau, optionType]);
+  }, [spot, strike, vol, rate, tau, optionType, wsRef]);
 
   return (
     <div style={{ padding: 20 }}>
       <h2>Black-Scholes Pricer — live</h2>
-
       <Controls
-        spot={spot}
-        setSpot={setSpot}
-        strike={strike}
-        setStrike={setStrike}
-        vol={vol}
-        setVol={setVol}
-        rate={rate}
-        setRate={setRate}
-        tau={tau}
-        setTau={setTau}
-        optionType={optionType}
-        setOptionType={setOptionType}
+        spot={spot} setSpot={setSpot}
+        strike={strike} setStrike={setStrike}
+        vol={vol} setVol={setVol}
+        rate={rate} setRate={setRate}
+        tau={tau} setTau={setTau}
+        optionType={optionType} setOptionType={setOptionType}
       />
-
       <div style={{ display: "flex", gap: 20, marginTop: 20 }}>
-        <div style={{ flex: 2 }}>
-          <ChartDisplay
-            spots={spots}
-            prices={prices}
-            payoffs={payoffs}
-            delta={deltas}
-            gamma={gammas}
-            vega={vegas}
-          />
-        </div>
-
         <div style={{ flex: 1 }}>
+          <ChartDisplay spots={spots} prices={prices} payoffs={payoffs} deltas={deltas} gammas={gammas} vegas={vegas} />
+        </div>
+        <div style={{ width: 300 }}>
           <h3>Résultats</h3>
           {result ? (
             <ul>
@@ -93,9 +66,7 @@ export default function App() {
               <li>Vega: {result.vega.toFixed(6)}</li>
               <li>Theta: {result.theta.toFixed(6)}</li>
             </ul>
-          ) : (
-            <div>En attente...</div>
-          )}
+          ) : <div>En attente...</div>}
         </div>
       </div>
     </div>

@@ -25,7 +25,7 @@ export default function useWS(url: string, onMessage: (msg: any) => void) {
     ws.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
-        console.log("Message reçu WS:", msg); // <- pour vérifier dans la console
+        console.log("Message reçu WS:", msg);
         onMessage(msg);
       } catch (err) {
         console.error("Erreur parsing WS", err);
@@ -33,10 +33,7 @@ export default function useWS(url: string, onMessage: (msg: any) => void) {
     };
 
     ws.onerror = (err) => console.error("WebSocket error:", err);
-
-    ws.onclose = () => {
-      console.log("⚠️ WebSocket fermé");
-    };
+    ws.onclose = () => console.log("⚠️ WebSocket fermé");
 
     return () => ws.close();
   }, [url]);

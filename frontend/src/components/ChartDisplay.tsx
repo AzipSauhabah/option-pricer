@@ -16,44 +16,78 @@ type Props = {
   spots: number[];
   prices?: number[];
   payoffs?: number[];
-  delta?: number[];
-  gamma?: number[];
-  vega?: number[];
+  deltas?: number[];
+  gammas?: number[];
+  vegas?: number[];
 };
 
-export default function ChartDisplay({ spots, prices, payoffs, delta, gamma, vega }: Props) {
-  const labels = spots.length ? spots.map((s) => s.toFixed(2)) : [];
-
+export default function ChartDisplay({ spots, prices, payoffs, deltas, gammas, vegas }: Props) {
+  const labels = spots.map((s) => s.toFixed(2));
   const datasets: any[] = [];
 
-  if (prices?.length) {
-    datasets.push({ label: "BS Price", data: prices, borderColor: "#8884d8", tension: 0.2 });
+  if (prices && prices.length) {
+    datasets.push({
+      label: "BS Price",
+      data: prices,
+      borderColor: "#8884d8",
+      fill: false,
+      tension: 0.2,
+    });
   }
-  if (payoffs?.length) {
-    datasets.push({ label: "Payoff", data: payoffs, borderColor: "#82ca9d", tension: 0.2 });
+  if (payoffs && payoffs.length) {
+    datasets.push({
+      label: "Payoff at Maturity",
+      data: payoffs,
+      borderColor: "#82ca9d",
+      fill: false,
+      tension: 0.2,
+    });
   }
-  if (delta?.length) {
-    datasets.push({ label: "Delta", data: delta, borderColor: "#ff7300", tension: 0.2 });
+  if (deltas && deltas.length) {
+    datasets.push({
+      label: "Delta",
+      data: deltas,
+      borderColor: "#ff7300",
+      fill: false,
+      tension: 0.2,
+    });
   }
-  if (gamma?.length) {
-    datasets.push({ label: "Gamma", data: gamma, borderColor: "#ff0000", tension: 0.2 });
+  if (gammas && gammas.length) {
+    datasets.push({
+      label: "Gamma",
+      data: gammas,
+      borderColor: "#ff0000",
+      fill: false,
+      tension: 0.2,
+    });
   }
-  if (vega?.length) {
-    datasets.push({ label: "Vega", data: vega, borderColor: "#00bfff", tension: 0.2 });
+  if (vegas && vegas.length) {
+    datasets.push({
+      label: "Vega",
+      data: vegas,
+      borderColor: "#00bfff",
+      fill: false,
+      tension: 0.2,
+    });
   }
+
+  const data = { labels, datasets };
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: "top" as const },
+      tooltip: { mode: "index" as const, intersect: false },
+    },
+    scales: {
+      x: { title: { display: true, text: "Spot" } },
+      y: { title: { display: true, text: "Value" } },
+    },
+  };
 
   return (
     <div style={{ width: "100%", height: 400 }}>
-      {datasets.length > 0 ? (
-        <Line
-          data={{ labels, datasets }}
-          options={{ responsive: true, maintainAspectRatio: false }}
-        />
-      ) : (
-        <div style={{ textAlign: "center", lineHeight: "400px", color: "#999" }}>
-          En attente de données...
-        </div>
-      )}
+      {datasets.length > 0 ? <Line data={data} options={options} /> : <div style={{ textAlign: "center", lineHeight: "400px", color: "#999" }}>En attente de données...</div>}
     </div>
   );
 }
