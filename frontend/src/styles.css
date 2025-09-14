@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f9f9f9;
+}
+
+h2, h3 {
+  margin: 0.5em 0;
+}
+
+input[type="range"] {
+  width: 200px;
+}
+
+select {
+  margin-left: 10px;
+}
